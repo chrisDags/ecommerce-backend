@@ -1,7 +1,9 @@
 package com.dags.ecommerce.config;
 
+import com.dags.ecommerce.entity.Country;
 import com.dags.ecommerce.entity.Product;
 import com.dags.ecommerce.entity.ProductCategory;
+import com.dags.ecommerce.entity.State;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
@@ -25,18 +27,19 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
         HttpMethod[] unsupportedActions = {HttpMethod.PUT, HttpMethod.POST, HttpMethod.DELETE};
 
-
-        config.getExposureConfiguration()
-                .forDomainType(Product.class)
-                .withItemExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions))
-                .withCollectionExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions));
-
-        config.getExposureConfiguration()
-                .forDomainType(ProductCategory.class)
-                .withItemExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions))
-                .withCollectionExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions));
+        disableHttpMethods(Product.class, config, unsupportedActions);
+        disableHttpMethods(ProductCategory.class, config, unsupportedActions);
+        disableHttpMethods(Country.class, config, unsupportedActions);
+        disableHttpMethods(State.class, config, unsupportedActions);
 
         exposeIds(config);
+    }
+
+    private void disableHttpMethods(Class theClass, RepositoryRestConfiguration config, HttpMethod[] unsupportedActions) {
+        config.getExposureConfiguration()
+                .forDomainType(theClass)
+                .withItemExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions))
+                .withCollectionExposure((metadata, httpMethods) -> httpMethods.disable(unsupportedActions));
     }
 
     private void exposeIds(RepositoryRestConfiguration config) {
