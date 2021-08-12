@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -35,12 +36,19 @@ public class CheckoutServiceImpl implements CheckoutService {
         // add order items
         List<OrderItem> orderItems = purchaseDto.getOrderItems();
         orderItems.forEach(order::addOrderItem);
+        // basically doing this, but we are using a Set: order.setOrderItems(orderItems);
 
         order.setBillingAddress(purchaseDto.getBillingAddress());
         order.setShippingAddress(purchaseDto.getShippingAddress());
 
-        // add Order to Customer
+        // get customer from DTO then add Order to Customer
         Customer customer = purchaseDto.getCustomer();
+        // check if this is an existing customer
+        String email = customer.getEmail();
+        Customer customerDb = customerRepository.findByEmail(email);
+        if(customerDb != null){
+            customer = customerDb;
+        }
         customer.addOrder(order);
 
         customerRepository.save(customer);
