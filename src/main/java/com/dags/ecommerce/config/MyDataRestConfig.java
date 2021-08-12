@@ -5,6 +5,7 @@ import com.dags.ecommerce.entity.Product;
 import com.dags.ecommerce.entity.ProductCategory;
 import com.dags.ecommerce.entity.State;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
@@ -22,10 +23,13 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
 
     private final EntityManager entityManager;
 
+    @Value("${allowed.origins}")
+    private String[] allowedOrigins;
+
 
     @Override
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration config, CorsRegistry cors) {
-        HttpMethod[] unsupportedActions = {HttpMethod.PUT, HttpMethod.POST, HttpMethod.DELETE};
+        HttpMethod[] unsupportedActions = {HttpMethod.PUT, HttpMethod.POST, HttpMethod.DELETE, HttpMethod.PATCH};
 
         disableHttpMethods(Product.class, config, unsupportedActions);
         disableHttpMethods(ProductCategory.class, config, unsupportedActions);
@@ -33,6 +37,9 @@ public class MyDataRestConfig implements RepositoryRestConfigurer {
         disableHttpMethods(State.class, config, unsupportedActions);
 
         exposeIds(config);
+
+        cors.addMapping(config.getBasePath()+"/**").allowedOrigins(allowedOrigins);
+
     }
 
     private void disableHttpMethods(Class theClass, RepositoryRestConfiguration config, HttpMethod[] unsupportedActions) {
